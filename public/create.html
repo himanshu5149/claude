@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Create Menu — Menu</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#33443e;--muted:#70817a;--cream:#fffdf8;--coral:#dc8466;--coral-dark:#bb674e;--line:#e7e5dc;--white:#fff;--shadow:0 18px 45px rgba(72,84,75,.1)}
+*{box-sizing:border-box;margin:0;padding:0}body{background:var(--cream);color:var(--ink);font-family:"DM Sans",system-ui,sans-serif;min-height:100vh}
+a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer;border:0}.container{width:min(640px,calc(100% - 32px));margin:auto;padding:40px 0}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:20px;margin-bottom:32px}
+.brand-mark{width:28px;height:28px;background:var(--ink);border-radius:9px 9px 9px 3px;transform:rotate(-8deg);position:relative}
+.brand-mark:before,.brand-mark:after{content:"";position:absolute;background:#f5d6ac;border-radius:99px}
+.brand-mark:before{width:12px;height:4px;left:8px;top:8px;transform:rotate(-24deg)}
+.brand-mark:after{width:9px;height:4px;left:10px;top:15px;transform:rotate(-24deg)}
+h1{font-family:Fraunces,serif;font-size:32px;letter-spacing:-1px;margin-bottom:8px}
+.sub{color:var(--muted);margin-bottom:28px;font-size:15px}
+.card{background:var(--white);border-radius:20px;padding:28px;box-shadow:var(--shadow);border:1px solid var(--line)}
+label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#56665e}
+input,select,textarea{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;font:inherit;background:var(--cream);margin-bottom:16px;transition:border .15s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--coral)}
+.drop{border:2px dashed #d5d0c5;border-radius:16px;padding:32px;text-align:center;cursor:pointer;margin-bottom:20px;transition:border .15s,background .15s}
+.drop:hover,.drop.drag{border-color:var(--coral);background:#fdf6f2}
+.drop p{color:var(--muted);font-size:14px;margin-top:8px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 24px;border-radius:12px;font-weight:600;font-size:15px;width:100%;transition:transform .15s,box-shadow .15s}
+.btn-coral{background:var(--coral);color:#fff;box-shadow:0 4px 0 var(--coral-dark)}.btn-coral:hover{transform:translateY(-2px);box-shadow:0 6px 0 var(--coral-dark)}.btn-coral:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.result{display:none;text-align:center;padding:20px 0}
+.result img{max-width:220px;border-radius:12px;margin:16px auto;box-shadow:var(--shadow)}
+.result a{display:inline-block;margin:8px 6px;padding:10px 18px;border-radius:10px;font-weight:600;font-size:14px}
+.btn-dark{background:var(--ink);color:#fff}.btn-outline{border:1.5px solid var(--line);background:var(--white)}
+.err{color:#c0392b;font-size:13px;margin-bottom:12px;display:none}
+@media(max-width:500px){.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="/" class="brand"><div class="brand-mark"></div>Menu</a>
+  <h1>Create your digital menu</h1>
+  <p class="sub">Upload a PDF or photo, or start from a template. Takes under 2 minutes.</p>
+  <div class="card" id="formCard">
+    <div class="err" id="err"></div>
+    <form id="createForm">
+      <label>Restaurant name</label>
+      <input name="restaurantName" placeholder="e.g. La Maison" required>
+      <label>Short description (optional)</label>
+      <input name="description" placeholder="Farm-to-table · Since 2012">
+      <div class="row">
+        <div><label>Currency</label>
+          <select name="currency"><option value="EUR">EUR (€)</option><option value="USD">USD ($)</option><option value="GBP">GBP (£)</option><option value="INR">INR (₹)</option><option value="NPR">NPR (Rs)</option><option value="JPY">JPY (¥)</option><option value="AUD">AUD (A$)</option><option value="CAD">CAD (C$)</option><option value="AED">AED (AED)</option></select>
+        </div>
+        <div><label>Theme color</label>
+          <input type="color" name="themeColor" value="#efc2ae" style="height:44px;padding:4px">
+        </div>
+      </div>
+      <label>Menu file (PDF or image) — optional</label>
+      <div class="drop" id="drop">
+        <div style="font-size:32px">📄</div>
+        <p>Drop PDF / JPG / PNG here or click to browse</p>
+        <input type="file" name="menuFile" id="fileInput" accept=".pdf,.jpg,.jpeg,.png,.webp" hidden>
+      </div>
+      <p id="fileName" style="font-size:13px;color:var(--muted);margin-bottom:16px"></p>
+      <button type="submit" class="btn btn-coral" id="submitBtn">Create menu →</button>
+    </form>
+  </div>
+  <div class="result" id="result">
+    <h2 style="font-family:Fraunces,serif;font-size:26px;margin-bottom:8px">Your menu is live! 🎉</h2>
+    <p style="color:var(--muted);margin-bottom:12px">Scan or share the QR code. Manage orders from the dashboard.</p>
+    <img id="qrImg" alt="QR code">
+    <div>
+      <a id="menuLink" class="btn-dark" style="color:#fff;padding:12px 20px;border-radius:12px" target="_blank">Open menu</a>
+      <a id="dashLink" class="btn-outline" style="padding:12px 20px;border-radius:12px">Dashboard</a>
+    </div>
+    <p style="margin-top:20px;font-size:13px;color:var(--muted)">Save this link — anyone with it can view the menu.</p>
+  </div>
+</div>
+<script>
+const drop=document.getElementById('drop'),fileInput=document.getElementById('fileInput'),fileName=document.getElementById('fileName');
+drop.onclick=()=>fileInput.click();
+drop.ondragover=e=>{e.preventDefault();drop.classList.add('drag')};
+drop.ondragleave=()=>drop.classList.remove('drag');
+drop.ondrop=e=>{e.preventDefault();drop.classList.remove('drag');if(e.dataTransfer.files[0]){fileInput.files=e.dataTransfer.files;fileName.textContent='Selected: '+e.dataTransfer.files[0].name}};
+fileInput.onchange=()=>{if(fileInput.files[0])fileName.textContent='Selected: '+fileInput.files[0].name};
+
+document.getElementById('createForm').onsubmit=async e=>{
+  e.preventDefault();
+  const btn=document.getElementById('submitBtn');
+  const err=document.getElementById('err');
+  err.style.display='none';btn.disabled=true;btn.textContent='Creating…';
+  const fd=new FormData(e.target);
+  try{
+    const res=await fetch('/api/menus/create',{method:'POST',body:fd,credentials:'include'});
+    if(res.status===401){location.href='/login';return}
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.error||'Failed');
+    document.getElementById('formCard').style.display='none';
+    document.getElementById('result').style.display='block';
+    document.getElementById('qrImg').src=data.qrDataUrl;
+    document.getElementById('menuLink').href=data.menuUrl;
+    document.getElementById('dashLink').href=data.dashboardUrl;
+  }catch(ex){err.textContent=ex.message;err.style.display='block';btn.disabled=false;btn.textContent='Create menu →'}
+};
+</script>
+</body>
+</html>

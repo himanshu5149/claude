@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Dashboard — Menu</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#33443e;--muted:#70817a;--cream:#fffdf8;--coral:#dc8466;--line:#e7e5dc;--white:#fff;--sage:#dceadd}
+*{box-sizing:border-box;margin:0;padding:0}body{background:var(--cream);color:var(--ink);font-family:"DM Sans",system-ui,sans-serif}
+.top{background:var(--ink);color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.top h1{font-family:Fraunces,serif;font-size:18px}.tabs{display:flex;gap:4px;padding:12px 16px;background:var(--white);border-bottom:1px solid var(--line);overflow-x:auto}
+.tab{padding:9px 16px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;border:0;background:transparent;color:var(--muted);white-space:nowrap}
+.tab.active{background:var(--ink);color:#fff}
+.panel{display:none;padding:16px;max-width:900px;margin:auto}.panel.active{display:block}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+.stat{background:var(--white);border-radius:14px;padding:16px;border:1px solid var(--line);text-align:center}
+.stat .n{font-size:24px;font-weight:700}.stat .l{font-size:12px;color:var(--muted);margin-top:2px}
+.order{background:var(--white);border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid var(--line)}
+.order-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px}
+.order-num{font-weight:700;font-size:16px}.badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+.badge.new{background:#fde8e0;color:#c0392b}.badge.preparing{background:#fef5e0;color:#b7950b}.badge.ready{background:#e0f5e9;color:#1e8449}.badge.completed{background:#eaecee;color:#566573}.badge.cancelled{background:#f5e6e6;color:#922b21}
+.order-meta{font-size:13px;color:var(--muted);margin-bottom:8px}
+.order-items{font-size:14px;margin-bottom:10px}.order-items span{display:inline-block;background:#f3eee7;padding:2px 8px;border-radius:6px;margin:2px 4px 2px 0;font-size:12px}
+.actions{display:flex;gap:6px;flex-wrap:wrap}.actions button{padding:7px 12px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid var(--line);background:var(--white);cursor:pointer}
+.actions button.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+.item-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);gap:10px}
+.item-row input{padding:6px 10px;border:1px solid var(--line);border-radius:8px;font:inherit;width:80px}
+.btn{padding:10px 16px;border-radius:10px;font-weight:600;font-size:13px;border:0;cursor:pointer;background:var(--coral);color:#fff}
+.btn-outline{background:var(--white);border:1.5px solid var(--line);color:var(--ink)}
+.qr-box{text-align:center;padding:20px}.qr-box img{max-width:240px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.1)}
+form label{display:block;font-size:12px;font-weight:600;margin:10px 0 4px}form input,form select,form textarea{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font:inherit;margin-bottom:8px}
+.empty{text-align:center;padding:40px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="top">
+  <h1 id="dashTitle">Dashboard</h1>
+  <div style="display:flex;gap:8px">
+    <a id="menuLink" href="#" target="_blank" style="color:#f5c9af;font-size:13px;font-weight:600">View menu ↗</a>
+    <a href="/my-menus" style="color:rgba(255,255,255,.6);font-size:13px">My menus</a>
+  </div>
+</div>
+<div class="tabs">
+  <button class="tab active" data-p="orders">🔴 Live Orders</button>
+  <button class="tab" data-p="menu">✏️ Menu Editor</button>
+  <button class="tab" data-p="qr">📱 QR Code</button>
+  <button class="tab" data-p="settings">⚙️ Settings</button>
+</div>
+
+<div class="panel active" id="p-orders">
+  <div class="stats" id="stats"></div>
+  <div id="ordersList"><div class="empty">Loading…</div></div>
+</div>
+
+<div class="panel" id="p-menu">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+    <h2 style="font-family:Fraunces,serif;font-size:20px">Items</h2>
+    <button class="btn" onclick="showAddItem()">+ Add item</button>
+  </div>
+  <div id="editorList"></div>
+  <div id="addForm" style="display:none;background:var(--white);padding:16px;border-radius:14px;border:1px solid var(--line);margin-top:16px">
+    <h3 style="margin-bottom:10px">New item</h3>
+    <label>Name</label><input id="newName">
+    <label>Description</label><input id="newDesc">
+    <label>Price (<span id="curSym"></span>)</label><input id="newPrice" type="number" step="0.01">
+    <label>Category</label><select id="newCat"></select>
+    <div style="display:flex;gap:12px;margin:10px 0">
+      <label><input type="checkbox" id="newVegan"> Vegan</label>
+      <label><input type="checkbox" id="newVeg"> Vegetarian</label>
+      <label><input type="checkbox" id="newGf"> Gluten-free</label>
+    </div>
+    <button class="btn" onclick="addItem()">Save</button>
+    <button class="btn btn-outline" onclick="document.getElementById('addForm').style.display='none'">Cancel</button>
+  </div>
+</div>
+
+<div class="panel" id="p-qr">
+  <div class="qr-box">
+    <h2 style="font-family:Fraunces,serif;margin-bottom:12px">Table QR codes</h2>
+    <p style="color:var(--muted);margin-bottom:16px;font-size:14px">Print and place on tables. Guests scan to open the menu.</p>
+    <img id="qrImg" alt="QR">
+    <div style="margin-top:16px">
+      <label>Table number (optional)</label>
+      <input id="qrTable" placeholder="e.g. 5" style="max-width:160px;margin:8px auto;display:block">
+      <button class="btn" onclick="loadQr()" style="max-width:200px;margin:8px auto;display:block">Generate</button>
+      <a id="qrDownload" download="menu-qr.png" class="btn btn-outline" style="max-width:200px;margin:8px auto;display:block;text-align:center">Download PNG</a>
+    </div>
+  </div>
+</div>
+
+<div class="panel" id="p-settings">
+  <h2 style="font-family:Fraunces,serif;margin-bottom:16px">Settings</h2>
+  <form id="settingsForm" style="background:var(--white);padding:20px;border-radius:14px;border:1px solid var(--line);max-width:400px">
+    <label>Restaurant name</label><input id="setName">
+    <label>Description</label><textarea id="setDesc" rows="2"></textarea>
+    <label>Currency</label>
+    <select id="setCur"></select>
+    <label>Theme color</label><input type="color" id="setTheme" style="height:40px">
+    <button type="submit" class="btn" style="margin-top:12px">Save settings</button>
+  </form>
+</div>
+
+<script src="/currency.js"></script>
+<script>
+const esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+let cur='EUR';
+const slug=location.pathname.split('/').pop();
+let data=null,pollTimer=null;
+
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');document.getElementById('p-'+t.dataset.p).classList.add('active');
+  if(t.dataset.p==='orders')loadOrders();
+  if(t.dataset.p==='menu')loadEditor();
+  if(t.dataset.p==='qr')loadQr();
+});
+
+async function loadOrders(){
+  const res=await fetch('/api/orders/'+slug);
+  if(res.status===401){location.href='/login';return}
+  if(!res.ok){document.getElementById('ordersList').innerHTML='<div class="empty">You don\'t have access to this menu.</div>';return}
+  data=await res.json();cur=data.menu.currency;
+  document.getElementById('dashTitle').textContent=data.menu.restaurant_name+' · Dashboard';
+  document.getElementById('menuLink').href='/menu/'+slug;
+  const s=data.stats;
+  document.getElementById('stats').innerHTML=`
+    <div class="stat"><div class="n">${s.newOrders}</div><div class="l">New</div></div>
+    <div class="stat"><div class="n">${s.preparing}</div><div class="l">Preparing</div></div>
+    <div class="stat"><div class="n">${s.ready}</div><div class="l">Ready</div></div>
+    <div class="stat"><div class="n">${s.todayOrders}</div><div class="l">Today</div></div>
+    <div class="stat"><div class="n">${fmt(s.todayRevenue,cur)}</div><div class="l">Revenue today</div></div>`;
+  const list=document.getElementById('ordersList');
+  if(!data.orders.length){list.innerHTML='<div class="empty">No orders yet. Share your menu QR!</div>';return}
+  list.innerHTML=data.orders.map(o=>{
+    const items=(o.items||[]).map(i=>`<span>${i.qty||1}× ${esc(i.name)}</span>`).join('');
+    const next={new:'preparing',preparing:'ready',ready:'completed'};
+    const nextLabel={new:'Start preparing',preparing:'Mark ready',ready:'Complete'};
+    return `<div class="order">
+      <div class="order-head"><span class="order-num">${esc(o.order_number)}</span><span class="badge ${o.status}">${o.status}</span></div>
+      <div class="order-meta">${o.table_number?'Table '+esc(o.table_number)+' · ':''}${esc(o.customer_name||'Guest')} · ${esc(o.order_type)} · ${new Date(o.created_at).toLocaleTimeString()}</div>
+      <div class="order-items">${items}</div>
+      <div style="font-weight:700;margin-bottom:8px">${fmt(o.total,o.currency)}${o.customer_note?' · Note: '+esc(o.customer_note):''}</div>
+      <div class="actions">
+        ${next[o.status]?`<button class="primary" onclick="setStatus(${o.id},'${next[o.status]}')">${nextLabel[o.status]}</button>`:''}
+        ${o.status!=='cancelled'&&o.status!=='completed'?`<button onclick="setStatus(${o.id},'cancelled')">Cancel</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function setStatus(id,status){
+  await fetch('/api/orders/'+id+'/status',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status})});
+  loadOrders();
+}
+
+async function loadEditor(){
+  const res=await fetch('/api/menus/'+slug+'/full');
+  if(!res.ok)return;
+  data=await res.json();cur=data.menu.currency;
+  const cats=data.categories;
+  document.getElementById('newCat').innerHTML=cats.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')+'<option value="">No category</option>';
+  const el=document.getElementById('editorList');
+  el.innerHTML=data.items.map(i=>`<div class="item-row">
+    <div style="flex:1"><strong>${esc(i.name)}</strong> <span style="color:var(--muted);font-size:13px">${fmt(i.price,cur)}</span>
+      ${i.is_available?'':'<span class="badge cancelled">Hidden</span>'}
+    </div>
+    <button class="btn btn-outline" style="padding:6px 10px" onclick="toggleAvail(${i.id},${i.is_available?0:1})">${i.is_available?'Hide':'Show'}</button>
+    <button class="btn btn-outline" style="padding:6px 10px;color:#c0392b" onclick="delItem(${i.id})">Delete</button>
+  </div>`).join('')||'<div class="empty">No items</div>';
+}
+
+function showAddItem(){document.getElementById('addForm').style.display='block'}
+async function addItem(){
+  const body={name:document.getElementById('newName').value,description:document.getElementById('newDesc').value,
+    price:document.getElementById('newPrice').value,categoryId:document.getElementById('newCat').value||null,
+    is_vegan:document.getElementById('newVegan').checked,is_vegetarian:document.getElementById('newVeg').checked,is_gluten_free:document.getElementById('newGf').checked};
+  await fetch('/api/menus/'+slug+'/items',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  document.getElementById('addForm').style.display='none';loadEditor();
+}
+async function delItem(id){if(!confirm('Delete this item?'))return;await fetch('/api/menus/'+slug+'/items/'+id,{method:'DELETE'});loadEditor()}
+async function toggleAvail(id,val){await fetch('/api/menus/'+slug+'/items/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({is_available:val})});loadEditor()}
+
+function loadQr(){
+  const table=document.getElementById('qrTable').value;
+  const url='/api/menus/'+slug+'/qr'+(table?'?table='+encodeURIComponent(table):'');
+  document.getElementById('qrImg').src=url+(url.includes('?')?'&':'?')+'t='+Date.now();
+  document.getElementById('qrDownload').href=url;
+}
+
+document.getElementById('settingsForm').onsubmit=async e=>{
+  e.preventDefault();
+  await fetch('/api/menus/'+slug,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    restaurant_name:document.getElementById('setName').value,
+    description:document.getElementById('setDesc').value,
+    currency:document.getElementById('setCur').value,
+    theme_color:document.getElementById('setTheme').value
+  })});
+  alert('Saved!');loadOrders();
+};
+
+async function initSettings(){
+  document.getElementById('setCur').innerHTML=currencyOptions();
+  const res=await fetch('/api/menus/'+slug);
+  if(!res.ok)return;
+  const d=await res.json();
+  document.getElementById('setName').value=d.menu.restaurant_name||'';
+  document.getElementById('setDesc').value=d.menu.description||'';
+  document.getElementById('setCur').value=d.menu.currency||'EUR';cur=d.menu.currency||'EUR';document.getElementById('curSym').textContent=(CURRENCIES[cur]||[cur])[0].trim();
+  document.getElementById('setTheme').value=d.menu.theme_color||'#efc2ae';
+}
+
+loadOrders();
+initSettings();
+pollTimer=setInterval(loadOrders,8000);
+</script>
+</body>
+</html>
